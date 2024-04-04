@@ -5,10 +5,10 @@ const combined = async (req, res) => {
         const { month } = req.query;
 
         const [transactionsRes, statisticsRes, barchartRes, piechartRes] = await Promise.all([
-            axios.get(`${process.env.FRONTEND_URL_1}:${process.env.PORT}/transactions?month=${month}`),
-            axios.get(`${process.env.FRONTEND_URL_1}:${process.env.PORT}/statistics?month=${month}`),
-            axios.get(`${process.env.FRONTEND_URL_1}:${process.env.PORT}/barchart?month=${month}`),
-            axios.get(`${process.env.FRONTEND_URL_1}:${process.env.PORT}/piechart?month=${month}`)
+            axios.get(`${process.env.BACKEND_URL}:${process.env.PORT}/transactions?month=${month}`),
+            axios.get(`${process.env.BACKEND_URL}:${process.env.PORT}/statistics?month=${month}`),
+            axios.get(`${process.env.BACKEND_URL}:${process.env.PORT}/barchart?month=${month}`),
+            axios.get(`${process.env.BACKEND_URL}:${process.env.PORT}/piechart?month=${month}`)
         ]);
 
         const transactionsData = transactionsRes.data;

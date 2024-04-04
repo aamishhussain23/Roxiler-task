@@ -13,7 +13,7 @@ const cors = require('cors')
 const app = express();
 app.use(express.json());
 app.use(cors({
-    origin : [process.env.FRONTEND_URL_1, process.env.FRONTEND_URL_2],
+    origin : [process.env.BACKEND_URL, process.env.FRONTEND_URL_2],
     methods : ["GET", "POST", "PUT", "DELETE"],
     credentials : true
 }))
