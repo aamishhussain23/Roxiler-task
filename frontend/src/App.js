@@ -4,21 +4,19 @@ import TransactionsTable from './components/TransactionsTable';
 import Statistics from './components/Statistics';
 import BarChart from './components/BarChart';
 import PieChart from './components/PieChart';
+import Dashboard from './components/Dashboard';
 
 function App() {
-  const [month, setMonth] = useState('March');
 
   return (
-    <Router>
+    <Router> 
       <div className="App">
-        <select value={month} onChange={e => setMonth(e.target.value)}>
-          {/* Render month options */}
-        </select>
         <Routes>
-          <Route path="/" element={<Statistics month={month} />} />
-          <Route path="/transactions" element={<TransactionsTable month={month} />} />
-          <Route path="/barchart" element={<BarChart month={month} />} />
-          <Route path="/piechart" element={<PieChart month={month} />} />
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/statistics" element={<Statistics />} />
+          <Route path="/transactions" element={<TransactionsTable />} />
+          <Route path="/barchart" element={<BarChart />} />
+          <Route path="/piechart" element={<PieChart />} />
         </Routes>
       </div>
     </Router>

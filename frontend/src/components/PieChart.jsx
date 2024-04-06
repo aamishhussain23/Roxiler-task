@@ -1,39 +1,72 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Pie } from 'react-chartjs-2';
+import "chart.js/auto";
+import { Chart } from "react-chartjs-2";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
-const PieChart = ({ month }) => {
-  const [pieChartData, setPieChartData] = useState([]);
-
+const PieChart = () => {
+  const [labels, setLabels] = useState([]);
+  const [chartData, setChartData] = useState([]);
+  const [month, setMonth] = useState("");
+  const fetchData = async () => {
+    await axios
+      .get(`https://aamish-hussain-roxiler-task.onrender.com/piechart`,{params:{month:month}})
+      .then((res) => {
+        setLabels(res.data.map((item) => item.category));
+        setChartData(res.data.map((item) => item.count));
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
   useEffect(() => {
-    const fetchPieChartData = async () => {
-      try {
-        const result = await axios.get(`http://localhost:3000/piechart?month=${month}`);
-        setPieChartData(result.data);
-      } catch (error) {
-        console.error('Error fetching pie chart data:', error);
-      }
-    };
-    fetchPieChartData();
-  }, [month]);
+    fetchData();
+  },[month]);
 
   const data = {
-    labels: pieChartData.map(item => item.category),
+    labels: labels,
     datasets: [
       {
-        data: pieChartData.map(item => item.count),
-        backgroundColor: ['rgba(255,99,132,0.2)', 'rgba(54,162,235,0.2)', 'rgba(255,206,86,0.2)', 'rgba(75,192,192,0.2)', 'rgba(153,102,255,0.2)', 'rgba(255,159,64,0.2)'],
-        borderColor: ['rgba(255,99,132,1)', 'rgba(54,162,235,1)', 'rgba(255,206,86,1)', 'rgba(75,192,192,1)', 'rgba(153,102,255,1)', 'rgba(255,159,64,1)'],
-        borderWidth: 1
-      }
-    ]
+        label: "count",
+        data: chartData,
+        backgroundColor: [
+          "rgba(255, 127, 80)",
+          "rgba(72, 209, 204)",
+          "rgba(176, 224, 230)",
+          "rgba(255, 215, 0)",
+          "rgba(148, 0, 211)",
+        ],
+      },
+    ],
   };
-
-  return (
-    <div className="App">
-      {/* Render month selector, statistics, transactions table, and bar chart */}
-      <Pie data={data} />
+  return ( 
+    <>
+     <div style={{display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100vh', justifyContent: 'center'}}>
+     <div>
+        <label htmlFor="month" className="mr-2">Choose a month:</label>
+        <select
+          id="month"
+          style={{border: '2px solid gray', borderRadius: '4px', padding: '5px', outline: 'none'}}
+          value={month}
+          onChange={(e) => setMonth(e.target.value)}
+        >
+          <option value="">Select Month</option>
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+      </div>
+      <Chart type="pie" data={data} />
     </div>
+    </>
   );
 };
 
