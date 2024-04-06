@@ -2,8 +2,13 @@ const Product = require('../models/Product');
 
 const statistics = async (req, res) => {
     try {
+        const monthNames = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
         const { month } = req.query;
-        const startDate = new Date(`${month}-01`);
+        const monthNumber = monthNames.indexOf(month.charAt(0).toUpperCase() + month.slice(1)) + 1; // Convert month name to month number
+        const startDate = new Date(`${monthNumber}-01`);
         const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1);
 
         const totalSaleAmountResult = await Product.aggregate([
