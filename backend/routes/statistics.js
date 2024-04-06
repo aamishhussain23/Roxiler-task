@@ -1,14 +1,17 @@
 const Product = require('../models/Product');
+
 const statistics = async (req, res) => {
     try {
         const { month } = req.query;
+        const startDate = new Date(`${month}-01`);
+        const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1);
 
         const totalSaleAmountResult = await Product.aggregate([
             {
                 $match: {
                     dateOfSale: {
-                        $gte: new Date(`${month}-01`),
-                        $lt: new Date(`${month}-01T00:00:00.000Z`)
+                        $gte: startDate,
+                        $lt: endDate
                     }
                 }
             },
@@ -24,12 +27,12 @@ const statistics = async (req, res) => {
 
         const soldItems = await Product.countDocuments({
             sold: true,
-            dateOfSale: { $gte: new Date(`${month}-01`), $lt: new Date(`${month}-01T00:00:00.000Z`) }
+            dateOfSale: { $gte: startDate, $lt: endDate }
         });
 
         const notSoldItems = await Product.countDocuments({
             sold: false,
-            dateOfSale: { $gte: new Date(`${month}-01`), $lt: new Date(`${month}-01T00:00:00.000Z`) }
+            dateOfSale: { $gte: startDate, $lt: endDate }
         });
 
         res.json({
