@@ -2,24 +2,39 @@ const Product = require('../models/Product');
 const piechart = async (req, res) => {
     try {
         const { month } = req.query;
-        const categories = await Product.distinct('category');
 
-        const counts = await Promise.all(categories.map(async category => {
-            const count = await Product.countDocuments({
-                category,
-                dateOfSale: {
-                    $gte: new Date(`${month}-01`),
-                    $lt: new Date(`${month}-01T00:00:00.000Z`)
+        const pipeline = [
+            {
+                $addFields: {
+                    month: { $month: "$dateOfSale" }
                 }
-            });
-            return count;
-        }));
+            },
+            {
+                $match: {
+                    month: parseInt(month)
+                }
+            },
+            {
+                $group: {
+                    _id: "$category",
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    category: "$_id",
+                    count: 1
+                }
+            }
+        ];
 
-        const result = categories.map((category, i) => ({ category, count: counts[i] }));
-        res.json(result);
+        const result = await Product.aggregate(pipeline);
+
+        res.status(200).json(result);
     } catch (error) {
-        console.error('Error generating pie chart data:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 }
 
