@@ -2,47 +2,40 @@ const Product = require('../models/Product');
 
 const statistics = async (req, res) => {
     try {
-        const { month } = req.query;
-        const startDate = new Date(`${month}-01`);
-        const endDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1);
 
-        const totalSaleAmountResult = await Product.aggregate([
+        const { month } = req.query;
+
+        const pipeline = [
+            {
+                $addFields: {
+                    month: { $month: "$dateOfSale" }
+                }
+            },
             {
                 $match: {
-                    dateOfSale: {
-                        $gte: startDate,
-                        $lt: endDate
-                    }
+                    month: parseInt(month)
                 }
             },
             {
                 $group: {
                     _id: null,
-                    total: { $sum: '$price' }
+                    totalSaleAmount: { $sum: "$price" },
+                    totalSoldItems: { $sum: { $cond: [{ $eq: ["$sold", true] }, 1, 0] } },
+                    totalNotSoldItems: { $sum: { $cond: [{ $eq: ["$sold", false] }, 1, 0] } }
+                }
+            },
+            {
+                $project: {
+                    _id: 0
                 }
             }
-        ]);
+        ];
+        const result = await Product.aggregate(pipeline);
+        res.status(200).json(result);
 
-        const totalSaleAmount = totalSaleAmountResult.length > 0 ? totalSaleAmountResult[0].total : 0;
-
-        const soldItems = await Product.countDocuments({
-            sold: true,
-            dateOfSale: { $gte: startDate, $lt: endDate }
-        });
-
-        const notSoldItems = await Product.countDocuments({
-            sold: false,
-            dateOfSale: { $gte: startDate, $lt: endDate }
-        });
-
-        res.json({
-            totalSaleAmount,
-            soldItems,
-            notSoldItems
-        });
     } catch (error) {
-        console.error('Error fetching statistics:', error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        console.error(error);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 }
 
